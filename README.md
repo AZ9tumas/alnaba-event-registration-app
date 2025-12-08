@@ -1,50 +1,154 @@
-# Welcome to your Expo app 👋
+# Al Nab'a Event Registration App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A professional, full-stack mobile application designed to streamline the event registration process for Al Nab'a employees. This app provides a seamless interface for verifying employee details, managing registrations, and generating unique registration numbers (RND).
 
-## Get started
+## 🚀 Project Overview
 
-1. Install dependencies
+This project consists of a **React Native (Expo)** frontend and a **Python (Flask)** backend. It connects to a corporate **SQL Server** database to validate employee credentials and store registration data in real-time.
 
-   ```bash
-   npm install
-   ```
+### Key Features
 
-2. Start the app
+- **Employee Verification**: Instantly validates Employee IDs against the company database.
+- **Auto-Population**: Automatically fetches and displays Employee Name and Company upon valid ID entry.
+- **Duplicate Prevention**: Checks if an employee is already registered and prevents duplicate entries.
+- **Smart Redirection**: If an employee is already registered, they are immediately guided to their existing confirmation page.
+- **RND Generation**: Generates and assigns a unique 8-digit Registration Number (RND) upon successful registration.
+- **Network Health Check**: Automatically verifies server connectivity before allowing the user to proceed.
+- **Robust Error Handling**: Gracefully handles network timeouts and server errors with user-friendly prompts.
+- **Modern UI/UX**: Features smooth animations using `react-native-reanimated` and a clean, professional design.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠 Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Frontend
+- **Framework**: React Native (via Expo)
+- **Language**: TypeScript
+- **Styling**: StyleSheet, React Native Reanimated
+- **Navigation**: Conditional Rendering (State-based)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Backend
+- **Framework**: Flask (Python)
+- **Database Driver**: `pyodbc`
+- **CORS**: `flask-cors` for cross-origin resource sharing
 
-## Get a fresh project
+### Database
+- **System**: Microsoft SQL Server
+- **Table**: `Registration`
 
-When you're ready, run:
+---
 
+## 📋 Prerequisites
+
+Before setting up the project, ensure you have the following installed:
+
+1.  **Node.js** (LTS version recommended)
+2.  **Python 3.x**
+3.  **ODBC Driver for SQL Server** (Required for `pyodbc`)
+    - [Download ODBC Driver 17/18 for Windows](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)
+4.  **Expo Go App** (on your mobile device) or an Android/iOS Emulator.
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1. Clone the Repository
 ```bash
-npm run reset-project
+git clone <repository-url>
+cd reg-app
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Backend Setup
+The backend handles database connections and business logic.
 
-## Learn more
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
 
-To learn more about developing your project with Expo, look at the following resources:
+2.  (Optional) Create a virtual environment:
+    ```bash
+    python -m venv venv
+    # Windows
+    .\venv\Scripts\activate
+    # Mac/Linux
+    source venv/bin/activate
+    ```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+3.  Install Python dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Join the community
+4.  **Configuration**:
+    Open `backend/app.py` and verify the database credentials:
+    ```python
+    SERVER_IP = '172.16.31.60' # Update if your SQL Server IP changes
+    DATABASE = 'AlnabaIT'
+    USERNAME = 'your_username'
+    PASSWORD = 'your_password'
+    ```
 
-Join our community of developers creating universal apps.
+### 3. Frontend Setup
+The frontend is the mobile application interface.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1.  Navigate to the project root (if you are in `backend`, go back up):
+    ```bash
+    cd ..
+    ```
+
+2.  Install Node dependencies:
+    ```bash
+    npm install
+    ```
+
+3.  **Configuration**:
+    Open `App.tsx` and ensure the `API_URL` matches your backend server's IP address:
+    ```typescript
+    // App.tsx
+    const API_URL = 'http://172.16.31.60:8000'; // Must match the machine running app.py
+    ```
+    *Note: If running on a physical device, ensure your phone and computer are on the same Wi-Fi network.*
+
+---
+
+## 🚀 Running the Application
+
+### Step 1: Start the Backend Server
+Open a terminal in the `backend` folder and run:
+```bash
+python app.py
+```
+*You should see output indicating the server is running on `0.0.0.0:8000`.*
+
+### Step 2: Start the Expo Frontend
+Open a new terminal in the project root and run:
+```bash
+npx expo start
+```
+
+### Step 3: Launch on Device
+1.  Scan the QR code displayed in the terminal using the **Expo Go** app (Android) or Camera app (iOS).
+2.  The app will load on your device.
+
+---
+
+## 🔧 Troubleshooting
+
+### Network Error / "Unable to connect"
+- Ensure both devices are on the **same Wi-Fi network**.
+- Check if the **Firewall** on the backend machine is blocking port `8000`.
+- Verify the `API_URL` in `App.tsx` is correct.
+
+### Database Connection Failed
+- Ensure the **ODBC Driver** is installed.
+- Verify the SQL Server credentials in `app.py`.
+- Ensure SQL Server is configured to allow remote connections (TCP/IP enabled).
+
+### "Employee ID not found"
+- The entered ID does not exist in the `Registration` table. Ensure the database is populated with employee data.
+
+---
+
+## 📄 License
+[Your License Here]
