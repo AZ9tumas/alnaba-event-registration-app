@@ -2,7 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
+    FlatList,
+    Image,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -31,6 +34,7 @@ const Colors = {
         placeholder: '#8E8E93',
         shadow: '#000',
         success: '#34C759',
+        danger: '#FF3B30',
     },
     dark: {
         background: '#000000',
@@ -44,7 +48,107 @@ const Colors = {
         placeholder: '#98989D',
         shadow: '#FFF',
         success: '#30D158',
+        danger: '#FF453A',
     }
+};
+
+const API_URL = 'http://172.16.18.28:8000';
+
+// Admin Dashboard Screen
+const AdminDashboardScreen = ({ onLogout }: { onLogout: () => void }) => {
+    const theme = useColorScheme() ?? 'light';
+    const colors = Colors[theme];
+
+    const [stats, setStats] = useState<any[]>([]);
+    const [totalParticipants, setTotalParticipants] = useState(0);
+    const [totalRegistered, setTotalRegistered] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const fetchStats = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const response = await fetch(`${API_URL}/admin-stats`);
+            const data = await response.json();
+
+            if (response.ok) {
+                setStats(data.stats);
+                setTotalParticipants(data.totalParticipants);
+                setTotalRegistered(data.totalRegistered);
+            } else {
+                setError(data.error || 'Failed to fetch stats');
+            }
+        } catch (err) {
+            setError('Network error. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch on mount
+    useState(() => {
+        fetchStats();
+    });
+
+    const renderItem = ({ item }: { item: any }) => (
+        <View style={[styles.tableRow, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.tableCell, { color: colors.text, flex: 2 }]}>{item.company}</Text>
+            <Text style={[styles.tableCell, { color: colors.text, flex: 1, textAlign: 'center' }]}>{item.participants}</Text>
+            <Text style={[styles.tableCell, { color: colors.text, flex: 1, textAlign: 'center' }]}>{item.registered}</Text>
+        </View>
+    );
+
+    return (
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <View style={[styles.header, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                <Text style={[styles.title, { fontSize: 24, marginBottom: 0, color: colors.text }]}>Dashboard</Text>
+                <TouchableOpacity onPress={onLogout}>
+                    <Ionicons name="log-out-outline" size={28} color={colors.danger} />
+                </TouchableOpacity>
+            </View>
+
+            <View style={{ padding: 20, flex: 1 }}>
+                {/* Summary Cards */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+                    <View style={[styles.statCard, { backgroundColor: colors.card, shadowColor: colors.shadow }]}>
+                        <Text style={[styles.statLabel, { color: colors.subText }]}>Total Registered</Text>
+                        <Text style={[styles.statValue, { color: colors.primary }]}>{totalRegistered}</Text>
+                    </View>
+                    <View style={[styles.statCard, { backgroundColor: colors.card, shadowColor: colors.shadow }]}>
+                        <Text style={[styles.statLabel, { color: colors.subText }]}>Total Participants</Text>
+                        <Text style={[styles.statValue, { color: colors.success }]}>{totalParticipants}</Text>
+                    </View>
+                </View>
+
+                {/* Table Header */}
+                <View style={[styles.tableHeader, { backgroundColor: colors.inputBg }]}>
+                    <Text style={[styles.tableHeaderText, { color: colors.text, flex: 2 }]}>Company</Text>
+                    <Text style={[styles.tableHeaderText, { color: colors.text, flex: 1, textAlign: 'center' }]}>Participants</Text>
+                    <Text style={[styles.tableHeaderText, { color: colors.text, flex: 1, textAlign: 'center' }]}>Reg</Text>
+                </View>
+
+                {loading ? (
+                    <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 20 }} />
+                ) : error ? (
+                    <View style={{ alignItems: 'center', marginTop: 20 }}>
+                        <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>
+                        <TouchableOpacity onPress={fetchStats} style={[styles.button, { backgroundColor: colors.primary, height: 40, paddingHorizontal: 20 }]}>
+                            <Text style={styles.buttonText}>Retry</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={stats}
+                        renderItem={renderItem}
+                        keyExtractor={(item, index) => index.toString()}
+                        contentContainerStyle={{ paddingBottom: 20 }}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )}
+            </View>
+        </View>
+    );
 };
 
 // Network Error Screen
@@ -84,7 +188,6 @@ const WelcomeScreen = ({ onProceed, onError }: { onProceed: () => void, onError:
     const theme = useColorScheme() ?? 'light';
     const colors = Colors[theme];
     const [isLoading, setIsLoading] = useState(false);
-    const API_URL = 'http://172.16.18.14:8000';
 
     const handleGetStarted = async () => {
         setIsLoading(true);
@@ -120,7 +223,11 @@ const WelcomeScreen = ({ onProceed, onError }: { onProceed: () => void, onError:
                 style={styles.contentContainer}
             >
                 <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow }]}>
-                    <Ionicons name="people-circle-outline" size={80} color={colors.primary} style={{ alignSelf: 'center', marginBottom: 20 }} />
+                    <Image 
+                        source={require('./img/logo.jpg')} 
+                        style={{ width: 200, height: 100, alignSelf: 'center', marginBottom: 20 }} 
+                        resizeMode="contain"
+                    />
                     <Text style={[styles.title, { color: colors.text }]}>Welcome</Text>
                     <Text style={[styles.subtitle, { color: colors.subText }]}>To the Al Nab'a Event Registration App</Text>
 
@@ -185,12 +292,9 @@ const ThankYouScreen = ({ rnd, isAlreadyRegistered, onDone }: { rnd: string, isA
 };
 
 // register
-const RegisterScreen = ({ onBack, onSuccess }: { onBack: () => void, onSuccess: (rnd: string, isAlreadyRegistered: boolean) => void }) => {
+const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => void, onSuccess: (rnd: string, isAlreadyRegistered: boolean) => void, onAdminLogin: () => void }) => {
     const theme = useColorScheme() ?? 'light';
     const colors = Colors[theme];
-
-    // API URL pointing to the server
-    const API_URL = 'http://172.16.18.14:8000';
 
     const [empId, setEmpId] = useState('');
     const [empIdError, setEmpIdError] = useState('');
@@ -198,11 +302,26 @@ const RegisterScreen = ({ onBack, onSuccess }: { onBack: () => void, onSuccess: 
     const [companyName, setCompanyName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [participants, setParticipants] = useState('');
+    
+    // Admin Mode State
+    const [isAdminMode, setIsAdminMode] = useState(false);
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     const handleEmpIdBlur = async () => {
         if (!empId) {
             setEmpIdError('');
             return;
+        }
+
+        // Check for admin mode
+        if (empId.toLowerCase() === 'admin') {
+            setIsAdminMode(true);
+            setEmpIdError('');
+            return;
+        } else {
+            setIsAdminMode(false);
         }
 
         try {
@@ -271,6 +390,38 @@ const RegisterScreen = ({ onBack, onSuccess }: { onBack: () => void, onSuccess: 
         }
     };
 
+    const handleAdminLogin = async () => {
+        if (!password) {
+            setLoginError('Password is required');
+            return;
+        }
+        
+        setIsLoggingIn(true);
+        setLoginError('');
+
+        try {
+            const response = await fetch(`${API_URL}/admin-login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                onAdminLogin();
+            } else {
+                setLoginError(data.error || 'Invalid password');
+            }
+        } catch (error) {
+            setLoginError('Network error. Please try again.');
+        } finally {
+            setIsLoggingIn(false);
+        }
+    };
+
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -291,86 +442,131 @@ const RegisterScreen = ({ onBack, onSuccess }: { onBack: () => void, onSuccess: 
                             entering={FadeInDown.delay(200).springify()}
                             style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow }]}
                         >
-                            <Text style={[styles.title, { color: colors.text, marginBottom: 25 }]}>Register</Text>
+                            <Text style={[styles.title, { color: colors.text, marginBottom: 25 }]}>
+                                {isAdminMode ? 'Admin Login' : 'Register'}
+                            </Text>
 
                             {/* EmpID - Prominent */}
                             <View style={styles.inputGroup}>
-                                <Text style={[styles.label, { color: colors.text }]}>EmpID</Text>
+                                <Text style={[styles.label, { color: colors.text }]}>
+                                    {isAdminMode ? 'Username' : 'EmpID'}
+                                </Text>
                                 <TextInput
                                     style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: empIdError ? 'red' : colors.border, fontWeight: 'bold' }]}
-                                    placeholder="Enter Employee ID"
+                                    placeholder={isAdminMode ? "Username" : "Enter Employee ID"}
                                     placeholderTextColor={colors.placeholder}
                                     value={empId}
                                     onChangeText={(text) => {
                                         setEmpId(text);
                                         if (empIdError) setEmpIdError('');
+                                        // Reset admin mode if user clears "admin"
+                                        if (isAdminMode && text.toLowerCase() !== 'admin') {
+                                            setIsAdminMode(false);
+                                        }
                                     }}
                                     onBlur={handleEmpIdBlur}
-                                    autoCapitalize="characters"
+                                    autoCapitalize="none"
                                 />
                                 {empIdError ? (
                                     <Text style={{ color: 'red', marginTop: 5, fontSize: 12 }}>{empIdError}</Text>
                                 ) : null}
                             </View>
 
-                            {/* Name and Company - Large Fields */}
-                            <View style={styles.inputGroup}>
-                                <Text style={[styles.label, { color: colors.text }]}>EmpName</Text>
-                                <TextInput
-                                    style={[styles.input, { backgroundColor: colors.disabledInputBg, color: colors.subText, borderColor: colors.border }]}
-                                    placeholder="Name"
-                                    placeholderTextColor={colors.placeholder}
-                                    value={empName}
-                                    editable={false}
-                                />
-                            </View>
-
-                            <View style={styles.inputGroup}>
-                                <Text style={[styles.label, { color: colors.text }]}>Company</Text>
-                                <TextInput
-                                    style={[styles.input, { backgroundColor: colors.disabledInputBg, color: colors.subText, borderColor: colors.border }]}
-                                    placeholder="Company"
-                                    placeholderTextColor={colors.placeholder}
-                                    value={companyName}
-                                    editable={false}
-                                />
-                            </View>
-
-                            {/* Phone and Participants - Row */}
-                            <View style={styles.row}>
-                                <View style={[styles.inputGroup, { flex: 3, marginRight: 10 }]}>
-                                    <Text style={[styles.label, { color: colors.text }]}>Phone Number</Text>
+                            {isAdminMode ? (
+                                // Admin Password Field
+                                <View style={styles.inputGroup}>
+                                    <Text style={[styles.label, { color: colors.text }]}>Password</Text>
                                     <TextInput
-                                        style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border }]}
-                                        placeholder="Phone"
+                                        style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: loginError ? 'red' : colors.border }]}
+                                        placeholder="Enter Password"
                                         placeholderTextColor={colors.placeholder}
-                                        value={phoneNumber}
-                                        onChangeText={(text) => setPhoneNumber(text.replace(/[^0-9]/g, ''))}
-                                        keyboardType="numeric"
+                                        value={password}
+                                        onChangeText={(text) => {
+                                            setPassword(text);
+                                            setLoginError('');
+                                        }}
+                                        secureTextEntry
                                     />
+                                    {loginError ? (
+                                        <Text style={{ color: 'red', marginTop: 5, fontSize: 12 }}>{loginError}</Text>
+                                    ) : null}
+                                    
+                                    <TouchableOpacity
+                                        style={[styles.button, { backgroundColor: colors.primary, marginTop: 20, opacity: isLoggingIn ? 0.7 : 1 }]}
+                                        onPress={handleAdminLogin}
+                                        activeOpacity={0.8}
+                                        disabled={isLoggingIn}
+                                    >
+                                        {isLoggingIn ? (
+                                            <ActivityIndicator color="#fff" />
+                                        ) : (
+                                            <Text style={styles.buttonText}>Login</Text>
+                                        )}
+                                    </TouchableOpacity>
                                 </View>
+                            ) : (
+                                // Regular Registration Fields
+                                <>
+                                    {/* Name and Company - Large Fields */}
+                                    <View style={styles.inputGroup}>
+                                        <Text style={[styles.label, { color: colors.text }]}>EmpName</Text>
+                                        <TextInput
+                                            style={[styles.input, { backgroundColor: colors.disabledInputBg, color: colors.subText, borderColor: colors.border }]}
+                                            placeholder="Name"
+                                            placeholderTextColor={colors.placeholder}
+                                            value={empName}
+                                            editable={false}
+                                        />
+                                    </View>
 
-                                <View style={[styles.inputGroup, { flex: 1 }]}>
-                                    <Text style={[styles.label, { color: colors.text }]}>Pax</Text>
-                                    <TextInput
-                                        style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border, textAlign: 'center' }]}
-                                        placeholder="#"
-                                        placeholderTextColor={colors.placeholder}
-                                        value={participants}
-                                        onChangeText={(text) => setParticipants(text.replace(/[^0-9]/g, ''))}
-                                        keyboardType="numeric"
-                                        maxLength={2}
-                                    />
-                                </View>
-                            </View>
+                                    <View style={styles.inputGroup}>
+                                        <Text style={[styles.label, { color: colors.text }]}>Company</Text>
+                                        <TextInput
+                                            style={[styles.input, { backgroundColor: colors.disabledInputBg, color: colors.subText, borderColor: colors.border }]}
+                                            placeholder="Company"
+                                            placeholderTextColor={colors.placeholder}
+                                            value={companyName}
+                                            editable={false}
+                                        />
+                                    </View>
 
-                            <TouchableOpacity
-                                style={[styles.button, { backgroundColor: colors.primary, marginTop: 10 }]}
-                                onPress={handleRegister}
-                                activeOpacity={0.8}
-                            >
-                                <Text style={styles.buttonText}>Register</Text>
-                            </TouchableOpacity>
+                                    {/* Phone and Participants - Row */}
+                                    <View style={styles.row}>
+                                        <View style={[styles.inputGroup, { flex: 3, marginRight: 10 }]}>
+                                            <Text style={[styles.label, { color: colors.text }]}>Phone Number</Text>
+                                            <TextInput
+                                                style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border }]}
+                                                placeholder="Phone"
+                                                placeholderTextColor={colors.placeholder}
+                                                value={phoneNumber}
+                                                onChangeText={(text) => setPhoneNumber(text.replace(/[^0-9]/g, ''))}
+                                                keyboardType="numeric"
+                                            />
+                                        </View>
+
+                                        <View style={[styles.inputGroup, { flex: 1 }]}>
+                                            <Text style={[styles.label, { color: colors.text }]}>Participants</Text>
+                                            <TextInput
+                                                style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border, textAlign: 'center' }]}
+                                                placeholder="#"
+                                                placeholderTextColor={colors.placeholder}
+                                                value={participants}
+                                                onChangeText={(text) => setParticipants(text.replace(/[^0-9]/g, ''))}
+                                                keyboardType="numeric"
+                                                maxLength={2}
+                                            />
+                                        </View>
+                                    </View>
+
+                                    <TouchableOpacity
+                                        style={[styles.button, { backgroundColor: colors.primary, marginTop: 10 }]}
+                                        onPress={handleRegister}
+                                        activeOpacity={0.8}
+                                    >
+                                        <Text style={styles.buttonText}>Register</Text>
+                                    </TouchableOpacity>
+                                </>
+                            )}
                         </Animated.View>
                     </View>
                 </View>
@@ -380,7 +576,7 @@ const RegisterScreen = ({ onBack, onSuccess }: { onBack: () => void, onSuccess: 
 };
 
 export default function App() {
-    const [currentScreen, setCurrentScreen] = useState<'welcome' | 'register' | 'thankyou' | 'networkError'>('welcome');
+    const [currentScreen, setCurrentScreen] = useState<'welcome' | 'register' | 'thankyou' | 'networkError' | 'adminDashboard'>('welcome');
     const [rndNumber, setRndNumber] = useState('');
     const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false);
     const theme = useColorScheme() ?? 'light';
@@ -403,9 +599,12 @@ export default function App() {
                     <RegisterScreen 
                         onBack={() => setCurrentScreen('welcome')} 
                         onSuccess={handleRegistrationSuccess}
+                        onAdminLogin={() => setCurrentScreen('adminDashboard')}
                     />
                 ) : currentScreen === 'networkError' ? (
                     <NetworkErrorScreen onRetry={() => setCurrentScreen('welcome')} />
+                ) : currentScreen === 'adminDashboard' ? (
+                    <AdminDashboardScreen onLogout={() => setCurrentScreen('welcome')} />
                 ) : (
                     <ThankYouScreen 
                         rnd={rndNumber} 
@@ -508,5 +707,46 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: '700',
+    },
+    // Admin Dashboard Styles
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        alignItems: 'center',
+    },
+    tableCell: {
+        fontSize: 14,
+    },
+    statCard: {
+        flex: 1,
+        padding: 15,
+        borderRadius: 12,
+        marginHorizontal: 5,
+        alignItems: 'center',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    statLabel: {
+        fontSize: 12,
+        marginBottom: 5,
+        fontWeight: '600',
+    },
+    statValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        paddingVertical: 10,
+        paddingHorizontal: 5,
+        borderRadius: 8,
+        marginBottom: 5,
+    },
+    tableHeaderText: {
+        fontWeight: 'bold',
+        fontSize: 14,
     },
 });

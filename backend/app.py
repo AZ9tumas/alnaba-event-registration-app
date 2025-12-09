@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from typing import List, Dict, Any
 import pyodbc
 import random
 
@@ -123,6 +124,91 @@ def register():
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+@app.route('/admin-login', methods=['POST'])
+def admin_login():
+    data = request.json
+    password = data.get('password')
+    
+    if not password:
+        return jsonify({'error': 'Password is required'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Check password for admin user
+        # Using the new admin table as per requirement
+        query = "SELECT pass FROM admin WHERE username = 'admin'"
+        cursor.execute(query)
+        row = cursor.fetchone()
+        
+        if not row:
+            return jsonify({'error': 'Admin user not found'}), 404
+            
+        db_password = row[0]
+        
+        # Simple string comparison as per requirement "take the password from there"
+        # In a real app, this should be hashed
+        if password == db_password:
+            return jsonify({'message': 'Login successful'})
+        else:
+            return jsonify({'error': 'Invalid password'}), 401
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/admin-stats', methods=['GET'])
+def admin_stats():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Get stats grouped by company
+        # Only counting registered users (LoctStat = 1)
+        query = f"""
+            SELECT 
+                EmpCompany, 
+                SUM(CAST(NoOfParticipant AS INT)) as TotalParticipants, 
+                COUNT(EmpNo) as TotalRegistered
+            FROM {TABLE_NAME} 
+            WHERE LoctStat = 1 
+            GROUP BY EmpCompany
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        stats: List[Dict[str, Any]] = []
+        total_participants = 0
+        total_registered = 0
+        
+        for row in rows:
+            company = row[0]
+            participants = int(row[1]) if row[1] is not None else 0
+            registered = row[2]
+            
+            stats.append({
+                'company': company,
+                'participants': participants,
+                'registered': registered
+            })
+            
+            total_participants += participants
+            total_registered += registered
+            
+        return jsonify({
+            'stats': stats,
+            'totalParticipants': total_participants,
+            'totalRegistered': total_registered
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
 
 if __name__ == '__main__':
     import socket
