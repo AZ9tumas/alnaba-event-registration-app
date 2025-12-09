@@ -27,7 +27,7 @@ const Colors = {
         card: '#FFFFFF',
         text: '#000000',
         subText: '#6C6C70',
-        primary: '#007AFF',
+        primary: '#016461',
         border: '#C6C6C8',
         inputBg: '#E5E5EA',
         disabledInputBg: '#D1D1D6',
@@ -41,7 +41,7 @@ const Colors = {
         card: '#1C1C1E',
         text: '#FFFFFF',
         subText: '#EBEBF5',
-        primary: '#0A84FF',
+        primary: '#016461',
         border: '#38383A',
         inputBg: '#2C2C2E',
         disabledInputBg: '#3A3A3C',
@@ -94,8 +94,8 @@ const AdminDashboardScreen = ({ onLogout }: { onLogout: () => void }) => {
     const renderItem = ({ item }: { item: any }) => (
         <View style={[styles.tableRow, { borderBottomColor: colors.border }]}>
             <Text style={[styles.tableCell, { color: colors.text, flex: 2 }]}>{item.company}</Text>
-            <Text style={[styles.tableCell, { color: colors.text, flex: 1, textAlign: 'center' }]}>{item.participants}</Text>
             <Text style={[styles.tableCell, { color: colors.text, flex: 1, textAlign: 'center' }]}>{item.registered}</Text>
+            <Text style={[styles.tableCell, { color: colors.text, flex: 1, textAlign: 'center' }]}>{item.participants}</Text>
         </View>
     );
 
@@ -124,8 +124,8 @@ const AdminDashboardScreen = ({ onLogout }: { onLogout: () => void }) => {
                 {/* Table Header */}
                 <View style={[styles.tableHeader, { backgroundColor: colors.inputBg }]}>
                     <Text style={[styles.tableHeaderText, { color: colors.text, flex: 2 }]}>Company</Text>
-                    <Text style={[styles.tableHeaderText, { color: colors.text, flex: 1, textAlign: 'center' }]}>Participants</Text>
                     <Text style={[styles.tableHeaderText, { color: colors.text, flex: 1, textAlign: 'center' }]}>Reg</Text>
+                    <Text style={[styles.tableHeaderText, { color: colors.text, flex: 1, textAlign: 'center' }]}>Participants</Text>
                 </View>
 
                 {loading ? (
@@ -229,7 +229,7 @@ const WelcomeScreen = ({ onProceed, onError }: { onProceed: () => void, onError:
                         resizeMode="contain"
                     />
                     <Text style={[styles.title, { color: colors.text }]}>Welcome</Text>
-                    <Text style={[styles.subtitle, { color: colors.subText }]}>To the Al Nab'a Event Registration App</Text>
+                    <Text style={[styles.subtitle, { color: colors.subText }]}>To the Al Nab'a Event Registration</Text>
 
                     <TouchableOpacity
                         style={[styles.button, { backgroundColor: colors.primary, opacity: isLoading ? 0.7 : 1 }]}
@@ -237,7 +237,7 @@ const WelcomeScreen = ({ onProceed, onError }: { onProceed: () => void, onError:
                         activeOpacity={0.8}
                         disabled={isLoading}
                     >
-                        <Text style={styles.buttonText}>{isLoading ? "Connecting..." : "Get Started"}</Text>
+                        <Text style={styles.buttonText}>{isLoading ? "Connecting..." : "Proceed"}</Text>
                         {!isLoading && <Ionicons name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />}
                     </TouchableOpacity>
                 </View>
@@ -274,8 +274,7 @@ const ThankYouScreen = ({ rnd, isAlreadyRegistered, onDone }: { rnd: string, isA
                     <View style={{ marginVertical: 20, alignItems: 'center' }}>
                         <Text style={{ color: colors.subText, fontSize: 16, marginBottom: 5 }}>Your Registration Number</Text>
                         <Text style={{ color: colors.primary, fontSize: 36, fontWeight: 'bold', letterSpacing: 2 }}>{rnd}</Text>
-                        <Text style={{ color: 'red', fontSize: 14, marginTop: 10, fontWeight: '600' }}>Please note this number or take a screenshot.</Text>
-                        <Text style={{ color: 'green', fontSize: 14, marginTop: 10, fontWeight: '600' }}>You can always return to this page later.</Text>
+                        <Text style={{ color: 'red', fontSize: 14, marginTop: 10, fontWeight: '600' }}>Take a screenshot for reference.</Text>
                     </View>
 
                     <TouchableOpacity
@@ -449,7 +448,7 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
                             {/* EmpID - Prominent */}
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, { color: colors.text }]}>
-                                    {isAdminMode ? 'Username' : 'EmpID'}
+                                    {isAdminMode ? 'Username' : 'Employee ID'}
                                 </Text>
                                 <TextInput
                                     style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: empIdError ? 'red' : colors.border, fontWeight: 'bold' }]}
@@ -457,7 +456,7 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
                                     placeholderTextColor={colors.placeholder}
                                     value={empId}
                                     onChangeText={(text) => {
-                                        setEmpId(text);
+                                        setEmpId(text.toUpperCase());
                                         if (empIdError) setEmpIdError('');
                                         // Reset admin mode if user clears "admin"
                                         if (isAdminMode && text.toLowerCase() !== 'admin') {
@@ -465,7 +464,7 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
                                         }
                                     }}
                                     onBlur={handleEmpIdBlur}
-                                    autoCapitalize="none"
+                                    autoCapitalize="characters"
                                 />
                                 {empIdError ? (
                                     <Text style={{ color: 'red', marginTop: 5, fontSize: 12 }}>{empIdError}</Text>
@@ -509,7 +508,7 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
                                 <>
                                     {/* Name and Company - Large Fields */}
                                     <View style={styles.inputGroup}>
-                                        <Text style={[styles.label, { color: colors.text }]}>EmpName</Text>
+                                        <Text style={[styles.label, { color: colors.text }]}>Employee Name</Text>
                                         <TextInput
                                             style={[styles.input, { backgroundColor: colors.disabledInputBg, color: colors.subText, borderColor: colors.border }]}
                                             placeholder="Name"
@@ -532,7 +531,7 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
 
                                     {/* Phone and Participants - Row */}
                                     <View style={styles.row}>
-                                        <View style={[styles.inputGroup, { flex: 3, marginRight: 10 }]}>
+                                        <View style={[styles.inputGroup, { flex: 70, marginRight: 10 }]}>
                                             <Text style={[styles.label, { color: colors.text }]}>Phone Number</Text>
                                             <TextInput
                                                 style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border }]}
@@ -544,8 +543,8 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
                                             />
                                         </View>
 
-                                        <View style={[styles.inputGroup, { flex: 1 }]}>
-                                            <Text style={[styles.label, { color: colors.text }]}>Participants</Text>
+                                        <View style={[styles.inputGroup, { flex: 30 }]}>
+                                            <Text style={[styles.label, { color: colors.text }]}>Participant</Text>
                                             <TextInput
                                                 style={[styles.input, { backgroundColor: colors.inputBg, color: colors.text, borderColor: colors.border, textAlign: 'center' }]}
                                                 placeholder="#"
@@ -553,7 +552,7 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
                                                 value={participants}
                                                 onChangeText={(text) => setParticipants(text.replace(/[^0-9]/g, ''))}
                                                 keyboardType="numeric"
-                                                maxLength={2}
+                                                maxLength={3}
                                             />
                                         </View>
                                     </View>
@@ -565,6 +564,10 @@ const RegisterScreen = ({ onBack, onSuccess, onAdminLogin }: { onBack: () => voi
                                     >
                                         <Text style={styles.buttonText}>Register</Text>
                                     </TouchableOpacity>
+
+                                    <View style={{ marginVertical: 20, alignItems: 'center' }}>
+                                        <Text style={{ color: colors.subText, fontSize: 16, marginBottom: 5 }}>Call 99885343 for support.</Text>
+                                    </View>
                                 </>
                             )}
                         </Animated.View>
