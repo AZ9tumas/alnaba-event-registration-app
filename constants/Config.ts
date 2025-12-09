@@ -1,1 +1,1 @@
-export const API_URL = 'http://eventg.alnabaholding.com:8075';
+export const API_URL = 'http://96.9.143.65:8075';
