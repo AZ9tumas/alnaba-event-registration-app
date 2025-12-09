@@ -217,9 +217,9 @@ if __name__ == '__main__':
     hostname = socket.gethostname()
     try:
         local_ip = socket.gethostbyname(hostname)
-        print(f" \n *** YOUR API URL IS: http://{local_ip}:8000 *** \n")
+        print(f" \n *** YOUR API URL IS: http://{local_ip}:8075 *** \n")
     except:
         print("Could not determine local IP")
 
     # Host 0.0.0.0 allows access from other devices on the network
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8075, debug=True)
