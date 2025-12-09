@@ -54,21 +54,23 @@ def check_employee():
     cursor = conn.cursor()
     
     try:
-        query = f"SELECT EmpName, EmpCompany, LoctStat, RflDrwNo FROM {TABLE_NAME} WHERE EmpNo = ?"
+        query = f"SELECT EmpName, EmpCompany, LoctStat, RflDrwNo, Contact_No, NoOfParticipant FROM {TABLE_NAME} WHERE EmpNo = ?"
         cursor.execute(query, (emp_id,))
         row = cursor.fetchone()
 
         if not row:
             return jsonify({'error': 'Employee ID not found'}), 404
         
-        emp_name, company_name, lock_stat, rnd = row
+        emp_name, company_name, lock_stat, rnd, contact_no, participants = row
         
         if lock_stat == 1:
             return jsonify({
                 'empName': emp_name,
                 'companyName': company_name,
                 'alreadyRegistered': True,
-                'rnd': rnd
+                'rnd': rnd,
+                'phoneNumber': contact_no,
+                'participants': participants
             })
             
         return jsonify({

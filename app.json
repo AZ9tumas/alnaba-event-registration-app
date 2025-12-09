@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "reg-app",
+    "name": "Alnaba Event Registration",
     "slug": "reg-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./img/logo.jpg",
     "scheme": "regapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.az9tumas.alnabaEventRegistration"
     },
     "web": {
       "output": "static",
@@ -43,6 +44,18 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0ceac1cf-2b59-4afd-8463-eb9184af6d2a"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0ceac1cf-2b59-4afd-8463-eb9184af6d2a"
     }
   }
 }
