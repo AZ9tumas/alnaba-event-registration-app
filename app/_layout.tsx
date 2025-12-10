@@ -1,4 +1,3 @@
-import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -23,23 +22,9 @@ export default function RootLayout() {
     const theme = useColorScheme() ?? 'light';
     const colors = Colors[theme];
 
-    const [loaded, error] = useFonts({
-        'Ionicons': require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf'),
-    });
-
     useEffect(() => {
-        if (error) throw error;
-    }, [error]);
-
-    useEffect(() => {
-        if (loaded) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded]);
-
-    if (!loaded) {
-        return null;
-    }
+        SplashScreen.hideAsync();
+    }, []);
 
     return (
         <SafeAreaProvider>

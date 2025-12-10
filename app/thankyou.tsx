@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -31,11 +31,10 @@ export default function ThankYouScreen() {
                 style={styles.contentContainer}
             >
                 <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow, alignItems: 'center' }]}>
-                    <Ionicons 
-                        name={isAlreadyRegistered ? "information-circle" : "checkmark-circle"} 
-                        size={100} 
-                        color={isAlreadyRegistered ? colors.primary : colors.success} 
-                        style={{ marginBottom: 20 }} 
+                    <Image 
+                        source={require('../img/logo.jpg')} 
+                        style={{ width: 120, height: 120, marginBottom: 20, borderRadius: 60 }} 
+                        resizeMode="contain"
                     />
                     <Text style={[styles.title, { color: colors.text }]}>
                         {isAlreadyRegistered ? "Already Registered" : "Thank You!"}

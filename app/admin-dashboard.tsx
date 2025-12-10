@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -65,7 +64,7 @@ export default function AdminDashboardScreen() {
             <View style={[styles.header, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: insets.top + 10 }]}>
                 <Text style={[styles.title, { fontSize: 24, marginBottom: 0, color: colors.text }]}>Dashboard</Text>
                 <TouchableOpacity onPress={() => router.replace('/')}>
-                    <Ionicons name="log-out-outline" size={28} color={colors.danger} />
+                    <Text style={{ color: colors.danger, fontWeight: 'bold', fontSize: 16 }}>Logout</Text>
                 </TouchableOpacity>
             </View>
 

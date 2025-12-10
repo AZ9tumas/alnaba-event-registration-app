@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -220,8 +219,7 @@ export default function RegisterScreen() {
                     {/* Header with Back Button */}
                     <Animated.View entering={FadeInDown.duration(400)} style={[styles.header, { paddingTop: insets.top + 10 }]}>
                         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="chevron-back" size={28} color={colors.primary} />
-                            <Text style={[styles.backText, { color: colors.primary }]}>Back</Text>
+                            <Text style={[styles.backText, { color: colors.primary, fontSize: 18, fontWeight: '600' }]}>Back</Text>
                         </TouchableOpacity>
                     </Animated.View>
 

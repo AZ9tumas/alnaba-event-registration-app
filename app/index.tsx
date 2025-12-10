@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -68,7 +67,6 @@ export default function WelcomeScreen() {
                         disabled={isLoading}
                     >
                         <Text style={styles.buttonText}>{isLoading ? "Connecting..." : "Proceed"}</Text>
-                        {!isLoading && <Ionicons name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />}
                     </TouchableOpacity>
                 </View>
             </Animated.View>

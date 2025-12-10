@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import {
     StyleSheet,
@@ -22,7 +21,7 @@ export default function NetworkErrorScreen() {
                 style={styles.contentContainer}
             >
                 <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow, alignItems: 'center' }]}>
-                    <Ionicons name="cloud-offline" size={80} color="red" style={{ marginBottom: 20 }} />
+                    <Text style={{ fontSize: 60, marginBottom: 20 }}>⚠️</Text>
                     <Text style={[styles.title, { color: colors.text }]}>Network Error</Text>
                     <Text style={[styles.subtitle, { color: colors.subText }]}>
                         Unable to connect to the server. Please check your connection and try again later.
@@ -34,7 +33,6 @@ export default function NetworkErrorScreen() {
                         activeOpacity={0.8}
                     >
                         <Text style={styles.buttonText}>Try Again</Text>
-                        <Ionicons name="refresh" size={20} color="#FFF" style={{ marginLeft: 8 }} />
                     </TouchableOpacity>
                 </View>
             </Animated.View>
