@@ -108,8 +108,13 @@ def register():
         if row[0] == 1:
              return jsonify({'message': 'Already registered', 'rnd': row[1], 'alreadyRegistered': True})
 
-        # Generate 8-digit RND number
-        rnd_number = str(random.randint(10000000, 99999999))
+        # Generate unique 4-digit RND number
+        while True:
+            rnd_number = str(random.randint(1000, 9999))
+            check_rnd_query = f"SELECT 1 FROM {TABLE_NAME} WHERE RflDrwNo = ?"
+            cursor.execute(check_rnd_query, (rnd_number,))
+            if not cursor.fetchone():
+                break
 
         update_query = f"""
             UPDATE {TABLE_NAME} 
