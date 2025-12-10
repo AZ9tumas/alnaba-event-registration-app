@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -19,6 +19,15 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../constants/Colors';
 import { API_URL } from '../constants/Config';
+
+const DismissKeyboard = ({ children }: { children: any }) => {
+    if (Platform.OS === 'web') return <>{children}</>;
+    return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            {children}
+        </TouchableWithoutFeedback>
+    );
+};
 
 export default function RegisterScreen() {
     const theme = useColorScheme() ?? 'light';
@@ -39,6 +48,10 @@ export default function RegisterScreen() {
     const [loginError, setLoginError] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+    // Loading state for ID check
+    const [isCheckingId, setIsCheckingId] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
+
     const handleEmpIdBlur = async () => {
         if (!empId) {
             setEmpIdError('');
@@ -53,6 +66,9 @@ export default function RegisterScreen() {
         } else {
             setIsAdminMode(false);
         }
+
+        setIsCheckingId(true);
+        setEmpIdError('');
 
         try {
             const response = await fetch(`${API_URL}/check-employee?empId=${empId}`);
@@ -86,6 +102,8 @@ export default function RegisterScreen() {
         } catch (error) {
             console.error(error);
             setEmpIdError('Failed to connect to server');
+        } finally {
+            setIsCheckingId(false);
         }
     };
 
@@ -99,6 +117,11 @@ export default function RegisterScreen() {
             Alert.alert('Error', 'Please fill in all fields');
             return;
         }
+
+        // Prevent double submission or submission while checking
+        if (isCheckingId || isRegistering) return;
+
+        setIsRegistering(true);
 
         try {
             const response = await fetch(`${API_URL}/register`, {
@@ -150,6 +173,8 @@ export default function RegisterScreen() {
         } catch (error) {
             console.error(error);
             Alert.alert('Error', 'Failed to connect to server');
+        } finally {
+            setIsRegistering(false);
         }
     };
 
@@ -190,7 +215,7 @@ export default function RegisterScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={[styles.container, { backgroundColor: colors.background }]}
         >
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <DismissKeyboard>
                 <View style={{ flex: 1 }}>
                     {/* Header with Back Button */}
                     <Animated.View entering={FadeInDown.duration(400)} style={[styles.header, { paddingTop: insets.top + 10 }]}>
@@ -230,6 +255,13 @@ export default function RegisterScreen() {
                                     onBlur={handleEmpIdBlur}
                                     autoCapitalize="characters"
                                 />
+                                {isCheckingId && (
+                                    <ActivityIndicator 
+                                        size="small" 
+                                        color={colors.primary} 
+                                        style={{ position: 'absolute', right: 15, top: 45 }} 
+                                    />
+                                )}
                                 {empIdError ? (
                                     <Text style={{ color: 'red', marginTop: 5, fontSize: 12 }}>{empIdError}</Text>
                                 ) : null}
@@ -322,11 +354,16 @@ export default function RegisterScreen() {
                                     </View>
 
                                     <TouchableOpacity
-                                        style={[styles.button, { backgroundColor: colors.primary, marginTop: 10 }]}
+                                        style={[styles.button, { backgroundColor: colors.primary, marginTop: 10, opacity: (isCheckingId || isRegistering) ? 0.7 : 1 }]}
                                         onPress={handleRegister}
                                         activeOpacity={0.8}
+                                        disabled={isCheckingId || isRegistering}
                                     >
-                                        <Text style={styles.buttonText}>Register</Text>
+                                        {isRegistering ? (
+                                            <ActivityIndicator color="#fff" />
+                                        ) : (
+                                            <Text style={styles.buttonText}>Register</Text>
+                                        )}
                                     </TouchableOpacity>
 
                                     <View style={{ marginVertical: 20, alignItems: 'center' }}>
@@ -337,7 +374,7 @@ export default function RegisterScreen() {
                         </Animated.View>
                     </View>
                 </View>
-            </TouchableWithoutFeedback>
+            </DismissKeyboard>
         </KeyboardAvoidingView>
     );
 }
