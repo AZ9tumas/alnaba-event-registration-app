@@ -1,8 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from typing import List, Dict, Any
 import pyodbc
 import random
+import csv
+import io
 
 app = Flask(__name__)
 CORS(app)
@@ -116,12 +118,18 @@ def register():
             if not cursor.fetchone():
                 break
 
+        # Calculate Rank
+        rank_query = f"SELECT COUNT(*) FROM {TABLE_NAME} WHERE LoctStat = 1"
+        cursor.execute(rank_query)
+        current_count = cursor.fetchone()[0]
+        new_rank = current_count + 1
+
         update_query = f"""
             UPDATE {TABLE_NAME} 
-            SET Contact_No = ?, NoOfParticipant = ?, LoctStat = 1, RflDrwNo = ?
+            SET Contact_No = ?, NoOfParticipant = ?, LoctStat = 1, RflDrwNo = ?, Rank = ?
             WHERE EmpNo = ?
         """
-        cursor.execute(update_query, (phone_number, participants, rnd_number, emp_id))
+        cursor.execute(update_query, (phone_number, participants, rnd_number, new_rank, emp_id))
         conn.commit()
         
         return jsonify({'message': 'Registration successful', 'rnd': rnd_number})
@@ -210,6 +218,49 @@ def admin_stats():
             'totalParticipants': total_participants,
             'totalRegistered': total_registered
         })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/download-csv', methods=['GET'])
+def download_csv():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Fetch registered users with Rank and RND
+        # Assuming Rank column exists as per previous update
+        query = f"""
+            SELECT Rank, RflDrwNo, EmpName, EmpCompany 
+            FROM {TABLE_NAME} 
+            WHERE LoctStat = 1 
+            ORDER BY Rank
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        # Generate CSV content
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Rank', 'RND', 'Name', 'Company'])
+        
+        for row in rows:
+            # Handle potential None values
+            rank = row[0] if row[0] is not None else ''
+            rnd = row[1] if row[1] is not None else ''
+            name = row[2] if row[2] is not None else ''
+            company = row[3] if row[3] is not None else ''
+            writer.writerow([rank, rnd, name, company])
+            
+        output.seek(0)
+        
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-disposition": "attachment; filename=registrations.csv"}
+        )
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

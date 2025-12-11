@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
+    Linking,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -46,6 +47,20 @@ export default function AdminDashboardScreen() {
         }
     };
 
+    const downloadCsv = async () => {
+        try {
+            const canOpen = await Linking.canOpenURL(`${API_URL}/download-csv`);
+            if (canOpen) {
+                await Linking.openURL(`${API_URL}/download-csv`);
+            } else {
+                alert("Cannot open download link");
+            }
+        } catch (err) {
+            console.error("Failed to open URL:", err);
+            alert("Failed to download CSV");
+        }
+    };
+
     // Fetch on mount
     useEffect(() => {
         fetchStats();
@@ -80,6 +95,13 @@ export default function AdminDashboardScreen() {
                         <Text style={[styles.statValue, { color: colors.success }]}>{totalParticipants}</Text>
                     </View>
                 </View>
+
+                <TouchableOpacity 
+                    onPress={downloadCsv}
+                    style={[styles.button, { backgroundColor: colors.primary, marginBottom: 20, alignItems: 'center' }]}
+                >
+                    <Text style={styles.buttonText}>Download CSV</Text>
+                </TouchableOpacity>
 
                 {/* Table Header */}
                 <View style={[styles.tableHeader, { backgroundColor: colors.inputBg }]}>
